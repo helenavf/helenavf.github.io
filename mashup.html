@@ -1,0 +1,121 @@
+<html lang="es">
+
+<head>
+    <title>Fosses</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="autor" />
+    <meta name="description" content="descripción página">
+    <meta name="robots" content="index,follow">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
+    <link rel="stylesheet" href="L.Control.HtmlLegend.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        L_PREFER_CANVAS = true;
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+    <script src="https://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.js"></script>
+
+    <script src="js/leaflet-search.min.js"></script>
+    <link rel="stylesheet" href="css/leaflet-search.min.css" />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+    </style>
+    <script>
+        var map, mapbox, esri;
+        var geojson, fosses;
+        var controlCapas;
+        var controlEscala;
+        var legend;
+        $(document).ready(function () {
+
+            map = L.map('map', {
+                center: [41.80613, 1.88416],
+                zoom: 9
+            });
+            mapbox = L.tileLayer('https://api.mapbox.com/styles/v1/helenavf/cjdklrycsk94v2ska3poz1xdn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiaGVsZW5hdmYiLCJhIjoiY2pjamdvanE2MGRtejJxbHhiY2gza2EzdiJ9.AZ0AlDaAzWWpuWYu-PxRUQ', {
+                maxZoom: 19,
+                minZoom: 1,
+                attribution: 'Mapbox'
+            }).addTo(map);
+
+            esri = L.tileLayer(
+                'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 17,
+                    minZoom: 1,
+                    attribution: 'Tiles © Esri',
+                });
+                
+            fosses = new L.GeoJSON.AJAX('datos/Fosses_comunes_a_Catalunya.geojson', {
+                maxZoom: 19,
+                minZoom: 14,
+                onEachFeature: function (feature, layer) {
+                    popupContent = "<b>"+'Municipi:'+ " " +  "</b><br>" + feature.properties.Municipi + "</br><b>" +'Tipus:' + " " + "</b><br>" + feature.properties
+                        .TipusFossa + "</br><b>"+ 'Número de restes:'+" " +"</b><br>" +  feature.properties.NumRestes + "</br><b>"+ 'Descripció:'+" " + "</b><br>" + feature.properties.Notes + "</b>";
+                    layer.bindPopup(popupContent);
+                },
+                pointToLayer: function getColor(feature, latlng) {
+                    if (feature.properties.Bandol =='Republicà') {
+                        return L.circleMarker(latlng, {
+                            radius: 6,
+                            fillColor: "#7537a8",
+                            color: "#ffffff",
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    }if (feature.properties.Bandol =='Rebel') {
+                        return L.circleMarker(latlng, {
+                            radius: 6,
+                            fillColor: "#cc3030",
+                            color: "#ffffff",
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    }else {
+                        return L.circleMarker(latlng, {
+                            radius: 6,
+                            fillColor: "#96a855",
+                            color: "#ffffff",
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    }
+                }
+            }).addTo(map);
+
+            var baseMaps = {
+                "Orto_esri": esri,
+                "Mapa_base": mapbox
+            };
+            var overlayMaps = {
+                      "Fosses comuns": fosses
+            };
+        
+            controlCapas = L.control.layers(baseMaps, overlayMaps,{collapsed:false});
+            controlCapas.addTo(map);
+            controlEscala = L.control.scale();
+            controlEscala.addTo(map);
+
+        });
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>
